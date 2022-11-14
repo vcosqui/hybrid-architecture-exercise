@@ -19,14 +19,18 @@ output "resource-ids" {
   # 1. Log in to Confluent Cloud
   $ confluent login
   # 2. Produce key-value records to topic '${confluent_kafka_topic.orders.topic_name}' by using ${confluent_service_account.app-producer.display_name}'s Kafka API Key
-  $ confluent kafka topic produce ${confluent_kafka_topic.orders.topic_name} --environment ${confluent_environment.dev.id} --cluster ${confluent_kafka_cluster.standard.id} --api-key "${confluent_api_key.app-producer-kafka-api-key.id}" --api-secret "${confluent_api_key.app-producer-kafka-api-key.secret}"
+  $ confluent kafka topic produce ${confluent_kafka_topic.orders.topic_name} --parse-key --delimiter # --environment ${confluent_environment.dev.id} --cluster ${confluent_kafka_cluster.standard.id} --api-key "${confluent_api_key.app-producer-kafka-api-key.id}" --api-secret "${confluent_api_key.app-producer-kafka-api-key.secret}"
   # Enter a few records and then press 'Ctrl-C' when you're done.
-  # Sample records:
-  # {"number":1,"date":18500,"shipping_address":"899 W Evelyn Ave, Mountain View, CA 94041, USA","cost":15.00}
-  # {"number":2,"date":18501,"shipping_address":"1 Bedford St, London WC2E 9HG, United Kingdom","cost":5.00}
-  # {"number":3,"date":18502,"shipping_address":"3307 Northland Dr Suite 400, Austin, TX 78731, USA","cost":10.00}
+  # Sample records: (Message Key is the customerId)
+  # 1#{"number":1,"customerId":1,"date":18500,"shipping_address":"899 W Evelyn Ave, Mountain View, CA 94041, USA","cost":15.00}
+  # 1#{"number":2,"customerId":1,"date":18501,"shipping_address":"1 Bedford St, London WC2E 9HG, United Kingdom","cost":5.00}
+  # 2#{"number":3,"customerId":2,"date":18502,"shipping_address":"3307 Northland Dr Suite 400, Austin, TX 78731, USA","cost":10.00}
+  # 3#{"number":1,"customerId":3,"date":18503,"shipping_address":"Helm st., Springfield, VA 22345, USA","cost":35.50}
+  # 4#{"number":2,"customerId":4,"date":18504,"shipping_address":"Niederrheinallee 335, Neukirchen-Vluyn, Germany","cost":5.00}
+  # 5#{"number":3,"customerId":5,"date":18505,"shipping_address":"67 Nan'an Rd, 荔湾区, China","cost":67.00}
+  # 6#{"number":3,"customerId":6,"date":18506,"shipping_address":"Uke St, 900211, Abuja, Nigeria","cost":120.00}
   # 3. Consume records from topic '${confluent_kafka_topic.orders.topic_name}' by using ${confluent_service_account.app-consumer.display_name}'s Kafka API Key
-  $ confluent kafka topic consume ${confluent_kafka_topic.orders.topic_name} --from-beginning --environment ${confluent_environment.dev.id} --cluster ${confluent_kafka_cluster.standard.id} --api-key "${confluent_api_key.app-consumer-kafka-api-key.id}" --api-secret "${confluent_api_key.app-consumer-kafka-api-key.secret}"
+  $ confluent kafka topic consume ${confluent_kafka_topic.orders.topic_name} --print-key --from-beginning --environment ${confluent_environment.dev.id} --cluster ${confluent_kafka_cluster.standard.id} --api-key "${confluent_api_key.app-consumer-kafka-api-key.id}" --api-secret "${confluent_api_key.app-consumer-kafka-api-key.secret}"
   # When you are done, press 'Ctrl-C'.
   EOT
 

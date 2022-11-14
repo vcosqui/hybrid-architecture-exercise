@@ -40,7 +40,7 @@ resource "confluent_stream_governance_cluster" "essentials" {
 # Update the config to use a cloud provider and region of your choice.
 # https://registry.terraform.io/providers/confluentinc/confluent/latest/docs/resources/confluent_kafka_cluster
 resource "confluent_kafka_cluster" "standard" {
-  display_name = "inventory"
+  display_name = "dev"
   availability = "SINGLE_ZONE"
   cloud        = "GCP"
   region       = "us-central1"
@@ -50,11 +50,11 @@ resource "confluent_kafka_cluster" "standard" {
   }
 }
 
-// 'app-manager' service account is required in this configuration to create 'orders' topic and assign roles
+// 'app-manager' service account is required in this configuration to create topics and assign roles
 // to 'app-producer' and 'app-consumer' service accounts.
 resource "confluent_service_account" "app-manager" {
   display_name = "app-manager"
-  description  = "Service account to manage 'inventory' Kafka cluster"
+  description  = "Service account to manage 'dev' Kafka cluster"
 }
 
 resource "confluent_role_binding" "app-manager-kafka-cluster-admin" {
@@ -98,8 +98,60 @@ resource "confluent_kafka_topic" "orders" {
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
   }
-  topic_name    = "orders"
-  rest_endpoint = confluent_kafka_cluster.standard.rest_endpoint
+  topic_name       = "orders"
+  partitions_count = 6
+  rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
+  config           = {
+    "retention.ms" = "-1"
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+resource "confluent_kafka_topic" "sellers" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name       = "sellers"
+  partitions_count = 6
+  rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
+  config           = {
+    "retention.ms" = "-1"
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+resource "confluent_kafka_topic" "customers" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name       = "customers"
+  partitions_count = 6
+  rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
+  config           = {
+    "retention.ms" = "-1"
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+resource "confluent_kafka_topic" "inventory" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name       = "inventory"
+  partitions_count = 6
+  rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
+  config           = {
+    "retention.ms" = "-1"
+  }
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
     secret = confluent_api_key.app-manager-kafka-api-key.secret
@@ -108,7 +160,7 @@ resource "confluent_kafka_topic" "orders" {
 
 resource "confluent_service_account" "app-consumer" {
   display_name = "app-consumer"
-  description  = "Service account to consume from 'orders' topic of 'inventory' Kafka cluster"
+  description  = "Service account to consume from 'orders', 'sellers', 'customers', 'inventory' topics of 'dev' Kafka cluster"
 }
 
 resource "confluent_api_key" "app-consumer-kafka-api-key" {
@@ -131,15 +183,33 @@ resource "confluent_api_key" "app-consumer-kafka-api-key" {
   }
 }
 
-resource "confluent_role_binding" "app-producer-developer-write" {
+resource "confluent_role_binding" "app-producer-orders-developer-write" {
   principal   = "User:${confluent_service_account.app-producer.id}"
   role_name   = "DeveloperWrite"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.orders.topic_name}"
 }
 
+resource "confluent_role_binding" "app-producer-sellers-developer-write" {
+  principal   = "User:${confluent_service_account.app-producer.id}"
+  role_name   = "DeveloperWrite"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.sellers.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-customers-developer-write" {
+  principal   = "User:${confluent_service_account.app-producer.id}"
+  role_name   = "DeveloperWrite"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.customers.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-inventory-developer-write" {
+  principal   = "User:${confluent_service_account.app-producer.id}"
+  role_name   = "DeveloperWrite"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.inventory.topic_name}"
+}
+
 resource "confluent_service_account" "app-producer" {
   display_name = "app-producer"
-  description  = "Service account to produce to 'orders' topic of 'inventory' Kafka cluster"
+  description  = "Service account to produce to 'orders', 'sellers', 'customers', 'inventory' topics of 'dev' Kafka cluster"
 }
 
 resource "confluent_api_key" "app-producer-kafka-api-key" {
@@ -164,18 +234,35 @@ resource "confluent_api_key" "app-producer-kafka-api-key" {
 
 // Note that in order to consume from a topic, the principal of the consumer ('app-consumer' service account)
 // needs to be authorized to perform 'READ' operation on both Topic and Group resources:
-resource "confluent_role_binding" "app-producer-developer-read-from-topic" {
+resource "confluent_role_binding" "app-producer-developer-orders-read-from-topic" {
   principal   = "User:${confluent_service_account.app-consumer.id}"
   role_name   = "DeveloperRead"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.orders.topic_name}"
 }
 
+resource "confluent_role_binding" "app-producer-developer-sellers-read-from-topic" {
+  principal   = "User:${confluent_service_account.app-consumer.id}"
+  role_name   = "DeveloperRead"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.sellers.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-customers-read-from-topic" {
+  principal   = "User:${confluent_service_account.app-consumer.id}"
+  role_name   = "DeveloperRead"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.customers.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-inventory-read-from-topic" {
+  principal   = "User:${confluent_service_account.app-consumer.id}"
+  role_name   = "DeveloperRead"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.inventory.topic_name}"
+}
+
 resource "confluent_role_binding" "app-producer-developer-read-from-group" {
-  principal = "User:${confluent_service_account.app-consumer.id}"
-  role_name = "DeveloperRead"
+  principal   = "User:${confluent_service_account.app-consumer.id}"
+  role_name   = "DeveloperRead"
   // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
   // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
   // Update it to match your target consumer group ID.
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=confluent_cli_consumer_*"
 }
-
