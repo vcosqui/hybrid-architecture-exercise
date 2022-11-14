@@ -12,15 +12,15 @@ provider "confluent" {
   cloud_api_secret = var.confluent_cloud_api_secret
 }
 
-resource "confluent_environment" "staging" {
-  display_name = "Staging"
+resource "confluent_environment" "dev" {
+  display_name = "dev"
 }
 
 # Stream Governance and Kafka clusters can be in different regions as well as different cloud providers,
 # but you should to place both in the same cloud and region to restrict the fault isolation boundary.
 data "confluent_stream_governance_region" "essentials" {
-  cloud   = "AWS"
-  region  = "us-east-2"
+  cloud   = "GCP"
+  region  = "us-central1"
   package = "ESSENTIALS"
 }
 
@@ -28,7 +28,7 @@ resource "confluent_stream_governance_cluster" "essentials" {
   package = data.confluent_stream_governance_region.essentials.package
 
   environment {
-    id = confluent_environment.staging.id
+    id = confluent_environment.dev.id
   }
 
   region {
@@ -42,11 +42,11 @@ resource "confluent_stream_governance_cluster" "essentials" {
 resource "confluent_kafka_cluster" "standard" {
   display_name = "inventory"
   availability = "SINGLE_ZONE"
-  cloud        = "AWS"
-  region       = "us-east-2"
+  cloud        = "GCP"
+  region       = "us-central1"
   standard {}
   environment {
-    id = confluent_environment.staging.id
+    id = confluent_environment.dev.id
   }
 }
 
@@ -78,7 +78,7 @@ resource "confluent_api_key" "app-manager-kafka-api-key" {
     kind        = confluent_kafka_cluster.standard.kind
 
     environment {
-      id = confluent_environment.staging.id
+      id = confluent_environment.dev.id
     }
   }
 
@@ -126,7 +126,7 @@ resource "confluent_api_key" "app-consumer-kafka-api-key" {
     kind        = confluent_kafka_cluster.standard.kind
 
     environment {
-      id = confluent_environment.staging.id
+      id = confluent_environment.dev.id
     }
   }
 }
@@ -157,7 +157,7 @@ resource "confluent_api_key" "app-producer-kafka-api-key" {
     kind        = confluent_kafka_cluster.standard.kind
 
     environment {
-      id = confluent_environment.staging.id
+      id = confluent_environment.dev.id
     }
   }
 }
