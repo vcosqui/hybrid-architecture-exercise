@@ -37,3 +37,12 @@ output "resource-ids" {
   sensitive = true
 }
 
+output "schema-registry" {
+  value = <<-EOT
+  Schema Registry [user_added] ID:   ${data.schemaregistry_schema.user_added.id}
+  Schema Registry [user_added] ID:   ${data.schemaregistry_schema.user_added.version}
+  Schema Registry [user_added] ID:   ${data.schemaregistry_schema.user_added.schema_id}
+  EOT
+
+  sensitive = true
+}

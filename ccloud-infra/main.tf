@@ -4,6 +4,9 @@ terraform {
       source  = "confluentinc/confluent"
       version = "1.13.0"
     }
+    schemaregistry = {
+      source = "arkiaconsulting/confluent-schema-registry"
+    }
   }
 }
 
@@ -265,4 +268,21 @@ resource "confluent_role_binding" "app-producer-developer-read-from-group" {
   // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
   // Update it to match your target consumer group ID.
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=confluent_cli_consumer_*"
+}
+
+
+// schema registry
+provider "schemaregistry" {
+  schema_registry_url = var.confluent_schema_registry_url
+  username            = var.confluent_schema_registry_api_key
+  password            = var.confluent_schema_registry_api_secret
+}
+
+resource "schemaregistry_schema" "user_added" {
+  subject = "customers"
+  schema  = file("./schemas/customer.avsc")
+}
+
+data "schemaregistry_schema" "user_added" {
+  subject = schemaregistry_schema.user_added.subject
 }
