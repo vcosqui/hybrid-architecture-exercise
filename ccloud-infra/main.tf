@@ -21,14 +21,14 @@ resource "confluent_environment" "dev" {
 
 # Stream Governance and Kafka clusters can be in different regions as well as different cloud providers,
 # but you should to place both in the same cloud and region to restrict the fault isolation boundary.
-data "confluent_stream_governance_region" "essentials" {
+data "confluent_stream_governance_region" "cluster" {
   cloud   = "GCP"
   region  = "us-central1"
   package = "ESSENTIALS"
 }
 
-resource "confluent_stream_governance_cluster" "essentials" {
-  package = data.confluent_stream_governance_region.essentials.package
+resource "confluent_stream_governance_cluster" "cluster" {
+  package = data.confluent_stream_governance_region.cluster.package
 
   environment {
     id = confluent_environment.dev.id
@@ -36,7 +36,7 @@ resource "confluent_stream_governance_cluster" "essentials" {
 
   region {
     # See https://docs.confluent.io/cloud/current/stream-governance/packages.html#stream-governance-regions
-    id = data.confluent_stream_governance_region.essentials.id
+    id = data.confluent_stream_governance_region.cluster.id
   }
 }
 
@@ -47,7 +47,9 @@ resource "confluent_kafka_cluster" "standard" {
   availability = "SINGLE_ZONE"
   cloud        = "GCP"
   region       = "us-central1"
-  standard {}
+  dedicated {
+    cku = 1
+  }
   environment {
     id = confluent_environment.dev.id
   }
@@ -105,7 +107,8 @@ resource "confluent_kafka_topic" "orders" {
   partitions_count = 6
   rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
   config           = {
-    "retention.ms" = "-1"
+    "retention.ms"                      = "-1"
+    "confluent.value.schema.validation" = true
   }
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
@@ -285,4 +288,40 @@ resource "schemaregistry_schema" "user_added" {
 
 data "schemaregistry_schema" "user_added" {
   subject = schemaregistry_schema.user_added.subject
+}
+
+
+resource "schemaregistry_schema" "user_added2" {
+  subject = "user_added"
+  schema  = file("./schemas/customer.avsc")
+}
+
+resource "confluent_kafka_topic" "user_added2" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name       = "user_added2"
+  partitions_count = 6
+  rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
+  config           = {
+    "retention.ms"                          = "-1"
+    "confluent.value.schema.validation"     = true
+    "confluent.value.subject.name.strategy" = "io.confluent.kafka.serializers.subject.TopicNameStrategy"
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
+resource "confluent_role_binding" "app-producer-user_added2-developer-write" {
+  principal   = "User:${confluent_service_account.app-producer.id}"
+  role_name   = "DeveloperWrite"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.user_added2.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-user_added2-read-from-topic" {
+  principal   = "User:${confluent_service_account.app-consumer.id}"
+  role_name   = "DeveloperRead"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.user_added2.topic_name}"
 }
