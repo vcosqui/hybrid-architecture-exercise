@@ -36,13 +36,17 @@ output "resource-ids" {
 
   sensitive = true
 }
+#
+#output "schema-registry" {
+#  value = <<-EOT
+#  Schema Registry [user_added] ID:   ${data.schemaregistry_schema.user_added.id}
+#  Schema Registry [user_added] ID:   ${data.schemaregistry_schema.user_added.version}
+#  Schema Registry [user_added] ID:   ${data.schemaregistry_schema.user_added.schema_id}
+#  EOT
+#
+#  sensitive = true
+#}
 
-output "schema-registry" {
-  value = <<-EOT
-  Schema Registry [user_added] ID:   ${data.schemaregistry_schema.user_added.id}
-  Schema Registry [user_added] ID:   ${data.schemaregistry_schema.user_added.version}
-  Schema Registry [user_added] ID:   ${data.schemaregistry_schema.user_added.schema_id}
-  EOT
 
-  sensitive = true
-}
+##confluent kafka topic produce user_added2 --parse-key --delimiter "#" --environment env-j5d728 --cluster lkc-v7g02p --api-key "4EETIYU52BRE2LC5" --api-secret "T4m95VzRHKjsM+nrN0rFHKwYZWYuCME3qwUmJjMt1aR++AoyvB3dycW4J1B4wFMm" --value-format avro --schema-id=100003 --sr-api-key="TE6O3Z4YHFRI4Z3Y" --sr-api-secret="4/aJidRl83S4/yIbDfW7Fhak4+o2+gPJhMnVrP1Z28qDklJjsM92r2G2TdxlH6iE"
+# 1#{"foo":"bar"}
