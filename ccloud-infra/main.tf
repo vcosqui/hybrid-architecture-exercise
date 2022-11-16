@@ -327,6 +327,36 @@ data "schemaregistry_schema" "order" {
   subject = schemaregistry_schema.order.subject
 }
 
+# -------------- kSql cluster --------------------
+
+resource "confluent_service_account" "ksql" {
+  display_name = "ksql-service-account"
+  description  = "Service account to manage ksqlDB cluster"
+}
+
+resource "confluent_role_binding" "app-ksql-kafka-cluster-admin" {
+  principal   = "User:${confluent_service_account.ksql.id}"
+  role_name   = "CloudClusterAdmin"
+  crn_pattern = confluent_kafka_cluster.standard.rbac_crn
+}
+
+resource "confluent_ksql_cluster" "ksql-cluster" {
+  display_name = "ksql"
+  csu          = 1
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  credential_identity {
+    id = confluent_service_account.ksql.id
+  }
+  environment {
+    id = confluent_environment.dev.id
+  }
+  depends_on = [
+    confluent_role_binding.app-ksql-kafka-cluster-admin,
+    confluent_stream_governance_cluster.essentials
+  ]
+}
 #
 #resource "null_resource" "example1" {
 #  provisioner "local-exec" {
