@@ -1,0 +1,7 @@
+1#{"id":1,"customer_id":"00-000-0000", "items_ordered":"[1]",      "order_status":"SUBMITTED", "tracking_number":"N/A",        "create_time":"1657670040000"}
+2#{"id":2,"customer_id":"00-000-0000", "items_ordered":"[1, 2]",   "order_status":"PROCESSED", "tracking_number":"N/A",        "create_time":"1657673640000"}
+3#{"id":3,"customer_id":"00-000-0000", "items_ordered":"[1, 2, 3]","order_status":"IN-TRANSIT","tracking_number":"1349826936", "create_time":"1657679940000"}
+4#{"id":4,"customer_id":"00-000-0000", "items_ordered":"[2]",      "order_status":"SHIPPED",   "tracking_number":"675758787",  "create_time":"1657681040000"}
+5#{"id":5,"customer_id":"00-000-0002", "items_ordered":"[3, 4]",   "order_status":"SUBMITTED", "tracking_number":"N/A",        "create_time":"1657691040000"}
+6#{"id":6,"customer_id":"00-000-0002", "items_ordered":"[3, 4, 5]","order_status":"SUBMITTED", "tracking_number":"N/A",        "create_time":"1657899940000"}
+7#{"id":7,"customer_id":"00-000-0003", "items_ordered":"[1]",      "order_status":"PROCESSED", "tracking_number":"N/A",        "create_time":"1657973640000"}

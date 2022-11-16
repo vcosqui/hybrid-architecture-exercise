@@ -27,16 +27,18 @@
       "doc": "Order status, format: one of 'SUBMITTED', 'PROCESSED', 'IN-TRANSIT', 'SHIPPED', 'UNKNOWN'"
     },
     {
-      "name": "product_quantity",
-      "type": "int",
-      "default": "0",
-      "doc": "Available product stock amount."
+      "name": "tracking_number",
+      "type": "string",
+      "default": "N/A",
+      "doc": "Delivery tracking number."
     },
     {
-      "name": "seller_id",
-      "type": "string",
-      "default": "00-000-0000",
-      "doc": "Seller identifier who owns this product."
+      "name": "create_time",
+      "type": {
+        "type": "string",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Order creation timestamp."
     }
   ]
 }

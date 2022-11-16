@@ -1,0 +1,7 @@
+10-000-0000#{"id":"10-000-0000","seller_name":"Kendall Lundstrom",  "seller_company":"Asd Automotive",  "seller_email":"kendall.lundstrom@confluent.io","seller_address":"2511 Warner Street, Ft Lauderdale, FL, 33311, USA"}
+10-000-0001#{"id":"10-000-0001","seller_name":"Christopher Nelson", "seller_company":"Quesinberry Inc.","seller_email":"chris.nelson@confluent.io","seller_address":"3204 James Martin Circle, Columbus, OH, 43215, USA"}
+10-000-0002#{"id":"10-000-0002","seller_name":"Mickey Strauch",     "seller_company":"WLC corp.",       "seller_email":"mick.strauch@confluent.io","seller_address":"1391 Bassell Avenue, Little Rock, AR, 72211, USA"}
+10-000-0003#{"id":"10-000-0003","seller_name":"Samuel Newsome",     "seller_company":"Flat Airlines",   "seller_email":"sam.newsome@confluent.io","seller_address":"1522 Stockert Hollow Road, Kirkland, WA, 98034, USA"}
+10-000-0004#{"id":"10-000-0004","seller_name":"Diane Harada",       "seller_company":"Aquarius",        "seller_email":"diane.harada@confluent.io","seller_address":"2908 Waldeck Street, Arlington, TX, 76010, USA"}
+10-000-0005#{"id":"10-000-0005","seller_name":"Eileen Valazquez",   "seller_company":"Ocean Cruises",   "seller_email":"eileen.valazquez@confluent.io","seller_address":"1072 Jessie Street, Centerburg, OH, 43011, USA"}
+10-000-0006#{"id":"10-000-0006","seller_name":"Lucy D Riley",       "seller_company":"Solid State GmbH","seller_email":"lucy.riley@confluent.io"}

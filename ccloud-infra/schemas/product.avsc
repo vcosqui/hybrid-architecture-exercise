@@ -23,7 +23,7 @@
     {
       "name": "product_quantity",
       "type": "int",
-      "default": "0",
+      "default": 0,
       "doc": "Available product stock amount."
     },
     {
