@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "name": "seller",
+  "doc": "Seller entity definition.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Unique seller id, format '00-000-0000'"
+    },
+    {
+      "name": "seller_name",
+      "type": "string",
+      "default": "",
+      "doc": "Seller full name."
+    },
+    {
+      "name": "seller_company",
+      "type": "string",
+      "default": "",
+      "doc": "Seller company name."
+    },
+    {
+      "name": "seller_email",
+      "type": "string",
+      "default": "",
+      "doc": "Seller contact email."
+    },
+    {
+      "name": "seller_address",
+      "type": "string",
+      "default": "",
+      "doc": "Seller postal address."
+    }
+  ]
+}

@@ -20,6 +20,13 @@ output "resource-ids" {
   $ confluent login
   # 2. Produce key-value records to topic '${confluent_kafka_topic.orders.topic_name}' by using ${confluent_service_account.app-producer.display_name}'s Kafka API Key
   $ confluent kafka topic produce ${confluent_kafka_topic.orders.topic_name} --parse-key --delimiter # --environment ${confluent_environment.dev.id} --cluster ${confluent_kafka_cluster.standard.id} --api-key "${confluent_api_key.app-producer-kafka-api-key.id}" --api-secret "${confluent_api_key.app-producer-kafka-api-key.secret}"
+  $ ##########################################################################
+  $ confluent kafka topic produce ${confluent_kafka_topic.customers.topic_name} --parse-key --delimiter '#' \
+--environment ${confluent_environment.dev.id} --cluster ${confluent_kafka_cluster.standard.id} \
+--api-key "${confluent_api_key.app-producer-kafka-api-key.id}" --api-secret "${confluent_api_key.app-producer-kafka-api-key.secret}" \
+--sr-api-key="${var.confluent_schema_registry_api_key}" --sr-api-secret="${var.confluent_schema_registry_api_secret}" \
+--value-format avro --schema-id=${data.schemaregistry_schema.customer.schema_id}
+  $ ##########################################################################
   # Enter a few records and then press 'Ctrl-C' when you're done.
   # Sample records: (Message Key is the customerId)
   # 1#{"number":1,"customerId":1,"date":18500,"shipping_address":"899 W Evelyn Ave, Mountain View, CA 94041, USA","cost":15.00}

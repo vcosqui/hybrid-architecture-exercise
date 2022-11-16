@@ -1,0 +1,7 @@
+00-000-0000#{"id":"00-000-0000","customer_name":"Jane Doe","customer_email":"jane.doe@confluent.io","customer_address":"899 W Evelyn Ave, Mountain View, CA 94041, USA"}
+00-000-0001#{"id":"00-000-0001","customer_name":"John Doe","customer_email":"john.doe@confluent.io","customer_address":"1 Bedford St, London WC2E 9HG, United Kingdom"}
+00-000-0002#{"id":"00-000-0002","customer_name":"Max Mustermann","customer_email":"max.mustermann@confluent.io","customer_address":"Niederrheinallee 335, Neukirchen-Vluyn, Germany"}
+00-000-0003#{"id":"00-000-0003","customer_name":"张三","customer_email":"zhang.san@confluent.io","customer_address":"67 Nan'an Rd, 荔湾区, China"}
+00-000-0004#{"id":"00-000-0004","customer_name":"Ibrahim Musa","customer_email":"ibrahim.musa@confluent.io","customer_address":"Uke St, 900211, Abuja, Nigeria"}
+00-000-0005#{"id":"00-000-0005","customer_name":"Kumar Lal","customer_email":"kumar.lal@confluent.io","customer_address":"Ring Rd, Adil Nagar, Lucknow, 226022, India"}
+00-000-0006#{"id":"00-000-0006","customer_name":"Airton Senna","customer_email":"airton.senna@confluent.io"}

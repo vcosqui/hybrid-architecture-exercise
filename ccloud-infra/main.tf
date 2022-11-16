@@ -107,9 +107,9 @@ resource "confluent_kafka_topic" "orders" {
   partitions_count = 6
   rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
   config           = {
-    "retention.ms"                          = "-1"
-    "confluent.value.schema.validation"     = true
-    "confluent.value.subject.name.strategy" = "io.confluent.kafka.serializers.subject.TopicNameStrategy"
+    "retention.ms"                      = "-1"      # keep forever
+    "confluent.value.schema.validation" = true      # broker schema validation
+    "cleanup.policy"                    = "compact" # topic key is order_id
   }
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
@@ -125,9 +125,9 @@ resource "confluent_kafka_topic" "sellers" {
   partitions_count = 6
   rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
   config           = {
-    "retention.ms"                          = "-1"
-    "confluent.value.schema.validation"     = true
-    "confluent.value.subject.name.strategy" = "io.confluent.kafka.serializers.subject.TopicNameStrategy"
+    "retention.ms"                      = "-1"      # keep forever
+    "confluent.value.schema.validation" = true      # broker schema validation
+    "cleanup.policy"                    = "compact" # topic key is seller_id
   }
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
@@ -143,9 +143,9 @@ resource "confluent_kafka_topic" "customers" {
   partitions_count = 6
   rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
   config           = {
-    "retention.ms"                          = "-1"
-    "confluent.value.schema.validation"     = true
-    "confluent.value.subject.name.strategy" = "io.confluent.kafka.serializers.subject.TopicNameStrategy"
+    "retention.ms"                      = "-1"      # keep forever
+    "confluent.value.schema.validation" = true      # broker schema validation
+    "cleanup.policy"                    = "compact" # topic key is customer_id
   }
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
@@ -153,17 +153,17 @@ resource "confluent_kafka_topic" "customers" {
   }
 }
 
-resource "confluent_kafka_topic" "inventory" {
+resource "confluent_kafka_topic" "products" {
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
   }
-  topic_name       = "inventory"
+  topic_name       = "products"
   partitions_count = 6
   rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
   config           = {
-    "retention.ms"                          = "-1"
-    "confluent.value.schema.validation"     = true
-    "confluent.value.subject.name.strategy" = "io.confluent.kafka.serializers.subject.TopicNameStrategy"
+    "retention.ms"                      = "-1"      # keep forever
+    "confluent.value.schema.validation" = true      # server schema validation
+    "cleanup.policy"                    = "compact" # topic key is product_id
   }
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
@@ -173,7 +173,7 @@ resource "confluent_kafka_topic" "inventory" {
 
 resource "confluent_service_account" "app-consumer" {
   display_name = "app-consumer"
-  description  = "Service account to consume from 'orders', 'sellers', 'customers', 'inventory' topics of 'dev' Kafka cluster"
+  description  = "Service account to consume from 'orders', 'sellers', 'customers', 'products' topics of 'dev' Kafka cluster"
 }
 
 resource "confluent_api_key" "app-consumer-kafka-api-key" {
@@ -214,15 +214,15 @@ resource "confluent_role_binding" "app-producer-customers-developer-write" {
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.customers.topic_name}"
 }
 
-resource "confluent_role_binding" "app-producer-inventory-developer-write" {
+resource "confluent_role_binding" "app-producer-products-developer-write" {
   principal   = "User:${confluent_service_account.app-producer.id}"
   role_name   = "DeveloperWrite"
-  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.inventory.topic_name}"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.products.topic_name}"
 }
 
 resource "confluent_service_account" "app-producer" {
   display_name = "app-producer"
-  description  = "Service account to produce to 'orders', 'sellers', 'customers', 'inventory' topics of 'dev' Kafka cluster"
+  description  = "Service account to produce to 'orders', 'sellers', 'customers', 'products' topics of 'dev' Kafka cluster"
 }
 
 resource "confluent_api_key" "app-producer-kafka-api-key" {
@@ -265,10 +265,10 @@ resource "confluent_role_binding" "app-producer-developer-customers-read-from-to
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.customers.topic_name}"
 }
 
-resource "confluent_role_binding" "app-producer-developer-inventory-read-from-topic" {
+resource "confluent_role_binding" "app-producer-developer-products-read-from-topic" {
   principal   = "User:${confluent_service_account.app-consumer.id}"
   role_name   = "DeveloperRead"
-  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.inventory.topic_name}"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.products.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-developer-read-from-group" {
@@ -280,7 +280,6 @@ resource "confluent_role_binding" "app-producer-developer-read-from-group" {
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=confluent_cli_consumer_*"
 }
 
-
 // schema registry
 provider "schemaregistry" {
   schema_registry_url = var.confluent_schema_registry_url
@@ -288,41 +287,55 @@ provider "schemaregistry" {
   password            = var.confluent_schema_registry_api_secret
 }
 
-resource "schemaregistry_schema" "user_added" {
-  subject = "user_added-value"
+resource "schemaregistry_schema" "customer" {
+  # server will use to validate customers topic events
+  subject = "customers-value"
   schema  = file("./schemas/customer.avsc")
 }
 
-data "schemaregistry_schema" "user_added" {
-  subject = schemaregistry_schema.user_added.subject
+data "schemaregistry_schema" "customer" {
+  subject = schemaregistry_schema.customer.subject
 }
 
-resource "confluent_kafka_topic" "user_added" {
-  kafka_cluster {
-    id = confluent_kafka_cluster.standard.id
-  }
-  topic_name       = "user_added"
-  partitions_count = 6
-  rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
-  config           = {
-    "retention.ms"                          = "-1"
-    "confluent.value.schema.validation"     = true
-    "confluent.value.subject.name.strategy" = "io.confluent.kafka.serializers.subject.TopicNameStrategy"
-  }
-  credentials {
-    key    = confluent_api_key.app-manager-kafka-api-key.id
-    secret = confluent_api_key.app-manager-kafka-api-key.secret
-  }
+resource "schemaregistry_schema" "seller" {
+  # server will use to validate sellers topic events
+  subject = "sellers-value"
+  schema  = file("./schemas/seller.avsc")
 }
 
-resource "confluent_role_binding" "app-producer-user_added2-developer-write" {
-  principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperWrite"
-  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.user_added.topic_name}"
+data "schemaregistry_schema" "seller" {
+  subject = schemaregistry_schema.seller.subject
 }
 
-resource "confluent_role_binding" "app-producer-developer-user_added2-read-from-topic" {
-  principal   = "User:${confluent_service_account.app-consumer.id}"
-  role_name   = "DeveloperRead"
-  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.user_added.topic_name}"
+resource "schemaregistry_schema" "product" {
+  # server will use to validate products topic events
+  subject = "products-value"
+  schema  = file("./schemas/product.avsc")
 }
+
+data "schemaregistry_schema" "product" {
+  subject = schemaregistry_schema.product.subject
+}
+
+resource "schemaregistry_schema" "order" {
+  # server will use to validate orders topic events
+  subject = "orders-value"
+  schema  = file("./schemas/order.avsc")
+}
+
+data "schemaregistry_schema" "order" {
+  subject = schemaregistry_schema.order.subject
+}
+
+#
+#resource "null_resource" "example1" {
+#  provisioner "local-exec" {
+#    command = "echo '\n\n-= HEY GO DO THAT MANUAL THINGY THEN RUN `touch /tmp/ididit`; I WILL WAIT HERE =-\n\n'; while ! test -f /tmp/ididit; do sleep 1; done"
+#  }
+#}
+#resource "null_resource" "example2" {
+#  provisioner "local-exec" {
+#    command = "echo 'thanks!'"
+#  }
+#  depends_on = [null_resource.example1]
+#}

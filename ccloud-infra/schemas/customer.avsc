@@ -1,12 +1,30 @@
 {
   "type": "record",
-  "name": "sampleRecord",
-  "doc": "Sample schema to help you get started.",
+  "name": "customer",
+  "doc": "Customer entity definition.",
   "fields": [
     {
-      "name": "foo",
+      "name": "id",
       "type": "string",
-      "doc": "The string is a unicode character sequence."
+      "doc": "Unique customer id, format '00-000-0000'"
+    },
+    {
+      "name": "customer_name",
+      "type": "string",
+      "default": "",
+      "doc": "Customer full name."
+    },
+    {
+      "name": "customer_email",
+      "type": "string",
+      "default": "",
+      "doc": "Customer contact email."
+    },
+    {
+      "name": "customer_address",
+      "type": "string",
+      "default": "",
+      "doc": "Customer postal address."
     }
   ]
 }

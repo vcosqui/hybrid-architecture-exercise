@@ -1,0 +1,42 @@
+{
+  "type": "record",
+  "name": "order",
+  "doc": "Order entity.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "int",
+      "doc": "Unique order id."
+    },
+    {
+      "name": "customer_id",
+      "type": "string",
+      "default": "00-000-0000",
+      "doc": "Customer who made the order."
+    },
+    {
+      "name": "items_ordered",
+      "type": "string",
+      "default": "[]",
+      "doc": "Ordered list of products placed in this order, format: '[1, 2, 3]'"
+    },
+    {
+      "name": "order_status",
+      "type": "string",
+      "default": "UNKNOWN",
+      "doc": "Order status, format: one of 'SUBMITTED', 'PROCESSED', 'IN-TRANSIT', 'SHIPPED', 'UNKNOWN'"
+    },
+    {
+      "name": "product_quantity",
+      "type": "int",
+      "default": "0",
+      "doc": "Available product stock amount."
+    },
+    {
+      "name": "seller_id",
+      "type": "string",
+      "default": "00-000-0000",
+      "doc": "Seller identifier who owns this product."
+    }
+  ]
+}

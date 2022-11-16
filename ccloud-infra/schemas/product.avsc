@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "name": "product",
+  "doc": "Products inventory.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "int",
+      "doc": "Unique product id."
+    },
+    {
+      "name": "product_name",
+      "type": "string",
+      "default": "",
+      "doc": "Product name."
+    },
+    {
+      "name": "product_cost",
+      "type": "string",
+      "default": "$0.00",
+      "doc": "Product cost in dollars, format: '$6.77'"
+    },
+    {
+      "name": "product_quantity",
+      "type": "int",
+      "default": "0",
+      "doc": "Available product stock amount."
+    },
+    {
+      "name": "seller_id",
+      "type": "string",
+      "default": "00-000-0000",
+      "doc": "Seller identifier who owns this product."
+    }
+  ]
+}
