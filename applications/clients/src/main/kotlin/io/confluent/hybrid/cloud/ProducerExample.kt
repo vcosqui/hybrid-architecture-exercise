@@ -1,7 +1,25 @@
 //@file:JvmName("ProducerExample")
 //
-//package io.confluent.examples.clients.cloud
+//package io.confluent.hybrid.cloud
 //
+//import org.apache.avro.generic.GenericRecord
+//import org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG
+//import org.apache.kafka.clients.consumer.KafkaConsumer
+//import org.slf4j.LoggerFactory.getLogger
+//import uk.org.webcompere.lightweightconfig.ConfigLoader.loadPropertiesFromResource
+//import java.time.Duration.ofMillis
+//import java.util.UUID.randomUUID
+//
+//private val log = getLogger("io.confluent.hybrid.cloud.ProducerExample")
+//private val topics = listOf("customers", "sellers", "orders", "products")
+//
+//fun main() {
+//    val props = loadPropertiesFromResource("client.properties")
+//        .also { it[GROUP_ID_CONFIG] = "confluent_cli_consumer_1${randomUUID()}" }
+//
+//}
+
+
 //import io.confluent.examples.clients.cloud.model.DataRecord
 //import org.apache.kafka.clients.admin.AdminClient
 //import org.apache.kafka.clients.admin.NewTopic
@@ -15,38 +33,7 @@
 //import java.util.concurrent.ExecutionException
 //import kotlin.system.exitProcess
 //
-//// Create topic in Confluent Cloud
-//fun createTopic(
-//    topic: String,
-//    partitions: Int,
-//    replication: Short,
-//    cloudConfig: Properties
-//) {
-//    val newTopic = NewTopic(topic, partitions, replication)
-//
-//
-//    try {
-//        with(AdminClient.create(cloudConfig)) {
-//            createTopics(listOf(newTopic)).all().get()
-//        }
-//    } catch (e: ExecutionException) {
-//        if (e.cause !is TopicExistsException) throw e
-//    }
-//}
-//
-//fun main(args: Array<String>) {
-//    if (args.size != 2) {
-//        println("Please provide command line arguments: configPath topic")
-//        exitProcess(1)
-//    }
-//
-//    // Load properties from file
-//    val props = loadConfig(args[0])
-//
-//    // Create topic if needed
-//    val topic = args[1]
-//    createTopic(topic, 1, 3, props)
-//
+
 //    // Add additional properties.
 //    props[ACKS_CONFIG] = "all"
 //    props[KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.qualifiedName
