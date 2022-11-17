@@ -1,9 +1,18 @@
 .PHONY: consumer build download-avro-schemas help
-
+SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 ## ┌───────────────────────────────────────────────────────────────────┐
 ## │                       Example Makefile                            │
+## │ ───────────────────────────────────────────────────────────────── │
+## │ Be sure to init the shell with the following variables            │
+## │     (for example: ```source .env```)                              │
+## │ * CLUSTER_URL                                                     │
+## │ * CLUSTER_API_KEY                                                 │
+## │ * CLUSTER_API_SECRET                                              │
+## │ * TF_VAR_confluent_schema_registry_url                            │
+## │ * TF_VAR_confluent_schema_registry_api_key                        │
+## │ * TF_VAR_confluent_schema_registry_api_secret                     │
 ## │ ───────────────────────────────────────────────────────────────── │
 ## │ Example commands: "make build" or "make consumer"                 │
 ## └───────────────────────────────────────────────────────────────────┘
