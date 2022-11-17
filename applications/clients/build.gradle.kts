@@ -33,6 +33,7 @@ plugins {
     java
     kotlin("jvm") version "1.4.20"
     id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.8.0"
+    id("com.github.davidmc24.gradle.plugin.avro") version "1.5.0"
 }
 
 java {
@@ -53,6 +54,7 @@ dependencies {
     implementation("org.slf4j:slf4j-log4j12:2.0.3")
     implementation("uk.org.webcompere:lightweight-config:1.2.0")
     implementation("com.github.imflog:kafka-schema-registry-gradle-plugin:1.8.0")
+    implementation("org.apache.avro:avro:1.11.0")
 }
 
 tasks.withType<KotlinCompile> {
@@ -71,9 +73,9 @@ schemaRegistry {
         password.set("${System.getenv("TF_VAR_confluent_schema_registry_api_secret")}")
     }
     download {
-        subject("customers-value", "schemas/avro")
-        subject("orders-value", "schemas/avro")
-        subject("products-value", "schemas/avro")
-        subject("sellers-value", "schemas/avro")
+        subject("customers-value", "src/main/avro")
+        subject("orders-value", "src/main/avro")
+        subject("products-value", "src/main/avro")
+        subject("sellers-value", "src/main/avro")
     }
 }
