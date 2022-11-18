@@ -171,9 +171,27 @@ resource "confluent_kafka_topic" "products" {
   }
 }
 
+resource "confluent_kafka_topic" "priced_orders" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name       = "priced_orders"
+  partitions_count = 6
+  rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
+  config           = {
+    "retention.ms"                      = "-1"      # keep forever
+    "confluent.value.schema.validation" = true      # broker schema validation
+    "cleanup.policy"                    = "compact" # topic key is order_id
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
 resource "confluent_service_account" "app-consumer" {
   display_name = "app-consumer"
-  description  = "Service account to consume from 'orders', 'sellers', 'customers', 'products' topics of 'dev' Kafka cluster"
+  description  = "Service account to consume from 'orders', 'sellers', 'customers', 'products', 'priced_orders' topics of 'dev' Kafka cluster"
 }
 
 resource "confluent_api_key" "app-consumer-kafka-api-key" {
@@ -220,9 +238,16 @@ resource "confluent_role_binding" "app-producer-products-developer-write" {
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.products.topic_name}"
 }
 
+resource "confluent_role_binding" "app-producer-priced-orders-developer-write" {
+  principal   = "User:${confluent_service_account.app-producer.id}"
+  role_name   = "DeveloperWrite"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.priced_orders.topic_name}"
+}
+
+
 resource "confluent_service_account" "app-producer" {
   display_name = "app-producer"
-  description  = "Service account to produce to 'orders', 'sellers', 'customers', 'products' topics of 'dev' Kafka cluster"
+  description  = "Service account to produce to 'orders', 'sellers', 'customers', 'products', 'priced_orders' topics of 'dev' Kafka cluster"
 }
 
 resource "confluent_api_key" "app-producer-kafka-api-key" {
@@ -269,6 +294,12 @@ resource "confluent_role_binding" "app-producer-developer-products-read-from-top
   principal   = "User:${confluent_service_account.app-consumer.id}"
   role_name   = "DeveloperRead"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.products.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-priced-orders-read-from-topic" {
+  principal   = "User:${confluent_service_account.app-consumer.id}"
+  role_name   = "DeveloperRead"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.priced_orders.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-developer-read-from-group" {
@@ -325,6 +356,16 @@ resource "schemaregistry_schema" "order" {
 
 data "schemaregistry_schema" "order" {
   subject = schemaregistry_schema.order.subject
+}
+
+resource "schemaregistry_schema" "priced-order" {
+  # server will use to validate priced_orders topic events
+  subject = "priced-orders-value"
+  schema  = file("./schemas/priced_order.avsc")
+}
+
+data "schemaregistry_schema" "priced-order" {
+  subject = schemaregistry_schema.priced-order.subject
 }
 
 # -------------- kSql cluster --------------------
