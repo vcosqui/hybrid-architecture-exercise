@@ -1,4 +1,4 @@
-.PHONY: consumer build download-avro-schemas help
+.PHONY: consumer avro-consumer build download-avro-schemas help
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
@@ -14,14 +14,20 @@ SHELL := /bin/bash
 ## │ * TF_VAR_confluent_schema_registry_api_key                        │
 ## │ * TF_VAR_confluent_schema_registry_api_secret                     │
 ## │ ───────────────────────────────────────────────────────────────── │
-## │ Example commands: "make build" or "make consumer"                 │
+## │ Example use: source .env && make avro-consumer                    │
 ## └───────────────────────────────────────────────────────────────────┘
 
 consumer: ## Run consumer for input queues
 	@:$(call check_defined, CLUSTER_URL, Broker URL)
 	@:$(call check_defined, CLUSTER_API_KEY, Broker username)
 	@:$(call check_defined, CLUSTER_API_SECRET, Broker password)
-	./gradlew clean build runConsumer
+	./gradlew build runConsumer
+
+avro-consumer: ## Run consumer for input queues
+	@:$(call check_defined, CLUSTER_URL, Broker URL)
+	@:$(call check_defined, CLUSTER_API_KEY, Broker username)
+	@:$(call check_defined, CLUSTER_API_SECRET, Broker password)
+	./gradlew build runAVROConsumer
 
 build: ## Compile program
 	./gradlew clean build

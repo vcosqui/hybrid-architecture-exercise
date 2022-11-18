@@ -66,6 +66,11 @@ task("runConsumer", JavaExec::class) {
     main = "io.confluent.hybrid.cloud.ConsumerExample"
 }
 
+task("runAVROConsumer", JavaExec::class) {
+    classpath = sourceSets["main"].runtimeClasspath
+    main = "io.confluent.hybrid.cloud.AVROConsumerExample"
+}
+
 schemaRegistry {
     url.set("${System.getenv("TF_VAR_confluent_schema_registry_url")}")
     credentials {
