@@ -1,7 +1,7 @@
 {
   "type": "record",
-  "name": "order",
-  "doc": "Order entity.",
+  "name": "pricedOrder",
+  "doc": "Order entity with total price.",
   "fields": [
     {
       "name": "id",
