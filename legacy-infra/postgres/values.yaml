@@ -11,3 +11,40 @@ primary:
   persistence:
     enabled: false
     existingClaim: "postgresql-data-claim"
+  initdb:
+    user: "merchant"
+    password: "m3rch4nt"
+    scripts:
+      00_init_schema.sql: |
+        CREATE SCHEMA MERCHANT;
+        CREATE TABLE IF NOT EXISTS MERCHANT.CUSTOMERS (
+          id VARCHAR PRIMARY KEY,
+          customer_name VARCHAR,
+          customer_email VARCHAR,
+          customer_address VARCHAR
+        );
+        
+        CREATE TABLE IF NOT EXISTS MERCHANT.SELLERS (
+          id VARCHAR PRIMARY KEY,
+          seller_name VARCHAR,
+          seller_company VARCHAR,
+          seller_email VARCHAR,
+          seller_address VARCHAR
+        );
+        
+        CREATE TABLE IF NOT EXISTS MERCHANT.PRODUCTS (
+          id INTEGER PRIMARY KEY,
+          product_name VARCHAR,
+          product_cost VARCHAR,
+          product_quantity INT,
+          seller_id VARCHAR
+        );
+        
+        CREATE TABLE IF NOT EXISTS MERCHANT.ORDERS (
+          id INTEGER PRIMARY KEY,
+          customer_id VARCHAR,
+          items_ordered VARCHAR,
+          order_status VARCHAR,
+          tracking_number VARCHAR,
+          create_time TIMESTAMP
+        );
