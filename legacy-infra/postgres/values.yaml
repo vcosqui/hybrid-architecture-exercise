@@ -9,5 +9,5 @@ auth:
 # The postgres helm chart deployment will be using PVC postgresql-data-claim
 primary:
   persistence:
-    enabled: true
+    enabled: false
     existingClaim: "postgresql-data-claim"

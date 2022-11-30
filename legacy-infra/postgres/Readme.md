@@ -60,3 +60,7 @@ To connect to your database from outside the cluster execute the following comma
 kubectl port-forward --namespace default svc/postgresql 5432:5432 & 
 PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U merchant -d merchant -p 5432
 ```
+## Uninstall
+```shell
+helm uninstall postgresql
+```
