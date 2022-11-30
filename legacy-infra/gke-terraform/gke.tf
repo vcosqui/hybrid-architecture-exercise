@@ -23,7 +23,7 @@ variable "gke_num_nodes" {
 
 # GKE cluster
 resource "google_container_cluster" "primary" {
-  name     = "${var.project_id}-gke"
+  name     = "vcosqui-${var.project_id}-gke"
   location = var.region
 
   # We can't create a cluster with no node pool defined, but we want to only use
