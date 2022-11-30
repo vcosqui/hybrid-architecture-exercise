@@ -1,12 +1,20 @@
-variable "gke_username" {
-  default     = ""
-  description = "gke username"
+variable "project_id" {
+  description = "project id"
 }
 
-variable "gke_password" {
-  default     = ""
-  description = "gke password"
+variable "region" {
+  description = "region"
 }
+#
+#variable "gke_username" {
+#  default     = ""
+#  description = "gke username"
+#}
+#
+#variable "gke_password" {
+#  default     = ""
+#  description = "gke password"
+#}
 
 variable "gke_num_nodes" {
   default     = 2
@@ -24,8 +32,8 @@ resource "google_container_cluster" "primary" {
   remove_default_node_pool = true
   initial_node_count       = 1
 
-  network    = google_compute_network.vpc.name
-  subnetwork = google_compute_subnetwork.subnet.name
+  network    = "default"
+  subnetwork = "default"
 }
 
 # Separately Managed Node Pool
@@ -48,7 +56,7 @@ resource "google_container_node_pool" "primary_nodes" {
     # preemptible  = true
     machine_type = "n1-standard-1"
     tags         = ["gke-node", "${var.project_id}-gke"]
-    metadata = {
+    metadata     = {
       disable-legacy-endpoints = "true"
     }
   }
