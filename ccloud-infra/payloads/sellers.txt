@@ -5,3 +5,4 @@
 10-000-0004#{"id":"10-000-0004","seller_name":"Diane Harada",       "seller_company":"Aquarius",        "seller_email":"diane.harada@confluent.io","seller_address":"2908 Waldeck Street, Arlington, TX, 76010, USA"}
 10-000-0005#{"id":"10-000-0005","seller_name":"Eileen Valazquez",   "seller_company":"Ocean Cruises",   "seller_email":"eileen.valazquez@confluent.io","seller_address":"1072 Jessie Street, Centerburg, OH, 43011, USA"}
 10-000-0006#{"id":"10-000-0006","seller_name":"Lucy D Riley",       "seller_company":"Solid State GmbH","seller_email":"lucy.riley@confluent.io"}
+10-000-0007#{"id":"10-000-0007","seller_name":"Lucy D Riley",       "seller_company":"Solid State GmbH","seller_email":"lucy.riley@confluent.io"}

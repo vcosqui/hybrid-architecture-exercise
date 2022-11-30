@@ -5,3 +5,4 @@
 5000000#{"id":5000000,"product_name":"Boat Driller",      "product_cost":"$15.90",  "product_quantity":98881, "seller_id":"10-000-0005"}
 6000000#{"id":6000000,"product_name":"Plain Screwdriver", "product_cost":"$2.89",   "product_quantity":123,   "seller_id":"10-000-0005"}
 7000000#{"id":7000000,"product_name":"Gold Disposer",     "product_cost":"$1.00",   "product_quantity":99,    "seller_id":"10-000-0006"}
+7000001#{"id":7000001,"product_name":"Gold Disposer v2",     "product_cost":"$1.00",   "product_quantity":99,    "seller_id":"10-000-0006"}
