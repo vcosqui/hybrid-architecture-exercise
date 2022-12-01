@@ -250,8 +250,8 @@ resource "confluent_service_account" "app-producer" {
   description  = "Service account to produce to 'orders', 'sellers', 'customers', 'products', 'priced_orders' topics of 'dev' Kafka cluster"
 }
 
-resource "confluent_api_key" "app-producer-kafka-api-key" {
-  display_name = "app-producer-kafka-api-key"
+resource "confluent_api_key" "app-producer-kafka-api-key-v2" {
+  display_name = "app-producer-kafka-api-key-v2"
   description  = "Kafka API Key that is owned by 'app-producer' service account"
   owner {
     id          = confluent_service_account.app-producer.id

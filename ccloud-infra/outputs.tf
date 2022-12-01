@@ -8,8 +8,8 @@ output "resource-ids" {
   ${confluent_service_account.app-manager.display_name}'s Kafka API Key:     "${confluent_api_key.app-manager-kafka-api-key.id}"
   ${confluent_service_account.app-manager.display_name}'s Kafka API Secret:  "${confluent_api_key.app-manager-kafka-api-key.secret}"
   ${confluent_service_account.app-producer.display_name}:                    ${confluent_service_account.app-producer.id}
-  ${confluent_service_account.app-producer.display_name}'s Kafka API Key:    "${confluent_api_key.app-producer-kafka-api-key.id}"
-  ${confluent_service_account.app-producer.display_name}'s Kafka API Secret: "${confluent_api_key.app-producer-kafka-api-key.secret}"
+  ${confluent_service_account.app-producer.display_name}'s Kafka API Key:    "${confluent_api_key.app-producer-kafka-api-key-v2.id}"
+  ${confluent_service_account.app-producer.display_name}'s Kafka API Secret: "${confluent_api_key.app-producer-kafka-api-key-v2.secret}"
   ${confluent_service_account.app-consumer.display_name}:                    ${confluent_service_account.app-consumer.id}
   ${confluent_service_account.app-consumer.display_name}'s Kafka API Key:    "${confluent_api_key.app-consumer-kafka-api-key.id}"
   ${confluent_service_account.app-consumer.display_name}'s Kafka API Secret: "${confluent_api_key.app-consumer-kafka-api-key.secret}"
@@ -19,11 +19,11 @@ output "resource-ids" {
   # 1. Log in to Confluent Cloud
   $ confluent login
   # 2. Produce key-value records to topic '${confluent_kafka_topic.orders.topic_name}' by using ${confluent_service_account.app-producer.display_name}'s Kafka API Key
-  $ confluent kafka topic produce ${confluent_kafka_topic.orders.topic_name} --parse-key --delimiter # --environment ${confluent_environment.dev.id} --cluster ${confluent_kafka_cluster.standard.id} --api-key "${confluent_api_key.app-producer-kafka-api-key.id}" --api-secret "${confluent_api_key.app-producer-kafka-api-key.secret}"
+  $ confluent kafka topic produce ${confluent_kafka_topic.orders.topic_name} --parse-key --delimiter # --environment ${confluent_environment.dev.id} --cluster ${confluent_kafka_cluster.standard.id} --api-key "${confluent_api_key.app-producer-kafka-api-key-v2.id}" --api-secret "${confluent_api_key.app-producer-kafka-api-key-v2.secret}"
   $ ##########################################################################
   $ confluent kafka topic produce ${confluent_kafka_topic.customers.topic_name} --parse-key --delimiter '#' \
 --environment ${confluent_environment.dev.id} --cluster ${confluent_kafka_cluster.standard.id} \
---api-key "${confluent_api_key.app-producer-kafka-api-key.id}" --api-secret "${confluent_api_key.app-producer-kafka-api-key.secret}" \
+--api-key "${confluent_api_key.app-producer-kafka-api-key-v2.id}" --api-secret "${confluent_api_key.app-producer-kafka-api-key-v2.secret}" \
 --sr-api-key="${var.confluent_schema_registry_api_key}" --sr-api-secret="${var.confluent_schema_registry_api_secret}" \
 --value-format avro --schema-id=${data.schemaregistry_schema.customer.schema_id}
   $ ##########################################################################
