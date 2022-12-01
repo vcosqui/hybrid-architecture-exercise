@@ -9,7 +9,7 @@ terraform apply -auto-approve
 
 terraform output resource-ids
 
-confluent kafka topic produce user_added --parse-key --delimiter "#" --environment env-v7o9n0 --cluster lkc-pgyz3y --api-key "MQG2VS4WXMIHAOOV" --api-secret "hGJx9tCwbqg0/h2hZ7cHb7W06ZTd6tfny7JNZRFQVMrMs19Xk9tqZ1XCJukIdgpC" --value-format avro --schema-id=100001 --sr-api-key="EPE2RPHMEUB3EY5I" --sr-api-secret="ujpLF6srUMlNViYBXrR62irUL+H0EcwBGsD9SzMPEEOJLBrXq6fewSQC8y0a2wFB"
+confluent kafka topic produce user_added --parse-key --delimiter "#" --environment env-v7o9n0 --cluster lkc-pgyz3y --api-key "$api-key" --api-secret "$api-secret" --value-format avro --schema-id=100001 --sr-api-key="$sr-api-key" --sr-api-secret="$sr-api-secret"
 # Starting Kafka Producer. Use Ctrl-C or Ctrl-D to exit.
 # 1#{"foo":"bvar"}
 # 2#{"foo":"tar"}
