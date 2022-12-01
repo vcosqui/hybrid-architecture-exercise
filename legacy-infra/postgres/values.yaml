@@ -48,3 +48,52 @@ primary:
           tracking_number VARCHAR,
           create_time TIMESTAMP
         );
+      01_populate_data.sql: |
+        INSERT INTO MERCHANT.CUSTOMERS ( id, customer_name, customer_email, customer_address) 
+        VALUES 
+              ('00-000-0000','Jane Doe','jane.doe@confluent.io','899 W Evelyn Ave, Mountain View, CA 94041, USA'),
+              ('00-000-0001','John Doe','john.doe@confluent.io','1 Bedford St, London WC2E 9HG, United Kingdom'),
+              ('00-000-0002','Max Mustermann','max.mustermann@confluent.io','Niederrheinallee 335, Neukirchen-Vluyn, Germany'),
+              ('00-000-0003','张三','zhang.san@confluent.io','67 Nanan Rd, 荔湾区, China'),
+              ('00-000-0004','Ibrahim Musa','ibrahim.musa@confluent.io','Uke St, 900211, Abuja, Nigeria'),
+              ('00-000-0005','Kumar Lal','kumar.lal@confluent.io','Ring Rd, Adil Nagar, Lucknow, 226022, India'),
+              ('00-000-0006','Airton Senna','airton.senna@confluent.io',null)
+        ;
+
+        INSERT INTO MERCHANT.SELLERS ( id, seller_name, seller_company, seller_email, seller_address)
+        VALUES 
+              ('10-000-0000','Kendall Lundstrom','Asd Automotive','kendall.lundstrom@confluent.io','2511 Warner Street, Ft Lauderdale, FL, 33311, USA'),
+              ('10-000-0001','Christopher Nelson','Quesinberry Inc.','chris.nelson@confluent.io','3204 James Martin Circle, Columbus, OH, 43215, USA'),
+              ('10-000-0002','Mickey Strauch','WLC corp.','mick.strauch@confluent.io','1391 Bassell Avenue, Little Rock, AR, 72211, USA'),
+              ('10-000-0003','Samuel Newsome','Flat Airlines','sam.newsome@confluent.io','1522 Stockert Hollow Road, Kirkland, WA, 98034, USA'),
+              ('10-000-0004','Diane Harada','Aquarius','diane.harada@confluent.io','2908 Waldeck Street, Arlington, TX, 76010, USA'),
+              ('10-000-0005','Eileen Valazquez','Ocean Cruises','eileen.valazquez@confluent.io','1072 Jessie Street, Centerburg, OH, 43011, USA'),
+              ('10-000-0006','Lucy D Riley','Solid State GmbH','lucy.riley@confluent.io',null),
+              ('10-000-0007','Jack the R.','Body parts','jack.r@confluent.io',null)
+        ;
+
+        INSERT INTO MERCHANT.PRODUCTS ( id, product_name, product_cost, product_quantity, seller_id) 
+        VALUES
+              (1000000,'Biking Instrument','$100.00',1000,'10-000-0004'),
+              (2000000,'Tire Gadget','$3.99',30,'10-000-0004'),
+              (3000000,'Jewelry Tool','$1200.00',275,'10-000-0004'),
+              (4000000,'Engine Puller','$4.95',120,'10-000-0004'),
+              (5000000,'Boat Driller','$15.90',98881,'10-000-0005'),
+              (6000000,'Plain Screwdriver','$2.89',123,'10-000-0005'),
+              (7000000,'Gold Disposer','$1.00',99,'10-000-0006'),
+              (7000001,'Silver Disposer','$2.00',99,'10-000-0006')
+        ;
+        
+        INSERT INTO MERCHANT.ORDERS ( id, customer_id, items_ordered, order_status, tracking_number, create_time)
+        VALUES
+              (1000000,'00-000-0000','[1000000]','SUBMITTED','N/A', '2022-12-01 09:23:11'::timestamp),
+              (2000000,'00-000-0000','[1000000, 2000000]','PROCESSED','N/A', '2022-12-02 11:22:00'::timestamp),
+              (3000000,'00-000-0000','[1000000, 2000000, 3000000]','IN-TRANSIT','1349826936', '2022-12-03 06:12:11'::timestamp),
+              (4000000,'00-000-0000','[2000000]','SHIPPED','675758787', '2022-12-04 22:12:56'::timestamp),
+              (5000000,'00-000-0002','[3000000, 4000000]','SUBMITTED','N/A', '2022-12-05 02:00:01'::timestamp),
+              (6000000,'00-000-0002','[3000000, 4000000, 5000000]','SUBMITTED','N/A', '2022-12-06 05:12:19'::timestamp),
+              (7000000,'00-000-0003','[1000000]','PROCESSED','N/A', '2022-12-07 16:44:00'::timestamp),
+              (8000000,'00-000-0003','[1000000]','IN-TRANSIT','2318328333', '2022-12-07 16:44:00'::timestamp),
+              (9000000,'00-000-0003','[1000000]','IN-TRANSIT','4334234235', '2022-12-07 16:44:00'::timestamp),
+              (7000999,'00-000-0003','[1000000]','PROCESSED','N/A', '2022-12-08 18:51:01'::timestamp)
+        ;
