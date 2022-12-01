@@ -189,6 +189,23 @@ resource "confluent_kafka_topic" "priced_orders" {
   }
 }
 
+resource "confluent_kafka_topic" "connect-cp-kafka-connect-offset" {
+  kafka_cluster {
+    id = confluent_kafka_cluster.standard.id
+  }
+  topic_name       = "connect-cp-kafka-connect-offset"
+  partitions_count = 6
+  rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
+  config           = {
+    "retention.ms"                      = "-1"      # keep forever
+    "confluent.value.schema.validation" = true      # broker schema validation
+  }
+  credentials {
+    key    = confluent_api_key.app-manager-kafka-api-key.id
+    secret = confluent_api_key.app-manager-kafka-api-key.secret
+  }
+}
+
 resource "confluent_service_account" "app-consumer" {
   display_name = "app-consumer"
   description  = "Service account to consume from 'orders', 'sellers', 'customers', 'products', 'priced_orders' topics of 'dev' Kafka cluster"
@@ -244,10 +261,16 @@ resource "confluent_role_binding" "app-producer-priced-orders-developer-write" {
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.priced_orders.topic_name}"
 }
 
+resource "confluent_role_binding" "app-producer-connect-cp-kafka-connect-offset-developer-write" {
+  principal   = "User:${confluent_service_account.app-producer.id}"
+  role_name   = "DeveloperWrite"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.connect-cp-kafka-connect-offset.topic_name}"
+}
+
 
 resource "confluent_service_account" "app-producer" {
   display_name = "app-producer"
-  description  = "Service account to produce to 'orders', 'sellers', 'customers', 'products', 'priced_orders' topics of 'dev' Kafka cluster"
+  description  = "account to produce to 'orders', 'sellers', 'customers', 'products', 'priced_orders', 'connect-cp-kafka-connect-offset'"
 }
 
 resource "confluent_api_key" "app-producer-kafka-api-key-v2" {
@@ -302,6 +325,12 @@ resource "confluent_role_binding" "app-producer-developer-priced-orders-read-fro
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.priced_orders.topic_name}"
 }
 
+resource "confluent_role_binding" "app-producer-developer-connect-cp-kafka-connect-offset-read-from-topic" {
+  principal   = "User:${confluent_service_account.app-consumer.id}"
+  role_name   = "DeveloperRead"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.connect-cp-kafka-connect-offset.topic_name}"
+}
+
 resource "confluent_role_binding" "app-producer-developer-read-from-group" {
   principal   = "User:${confluent_service_account.app-consumer.id}"
   role_name   = "DeveloperRead"
@@ -309,6 +338,15 @@ resource "confluent_role_binding" "app-producer-developer-read-from-group" {
   // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
   // Update it to match your target consumer group ID.
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=confluent_cli_consumer_*"
+}
+
+resource "confluent_role_binding" "app-connect-read-from-group" {
+  principal   = "User:${confluent_service_account.app-consumer.id}"
+  role_name   = "DeveloperRead"
+  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+  // Update it to match your target consumer group ID.
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=connect*"
 }
 
 // schema registry
