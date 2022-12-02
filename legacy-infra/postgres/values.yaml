@@ -21,7 +21,8 @@ primary:
           id VARCHAR PRIMARY KEY,
           customer_name VARCHAR,
           customer_email VARCHAR,
-          customer_address VARCHAR
+          customer_address VARCHAR,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         
         CREATE TABLE IF NOT EXISTS MERCHANT.SELLERS (
@@ -29,7 +30,8 @@ primary:
           seller_name VARCHAR,
           seller_company VARCHAR,
           seller_email VARCHAR,
-          seller_address VARCHAR
+          seller_address VARCHAR,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         
         CREATE TABLE IF NOT EXISTS MERCHANT.PRODUCTS (
@@ -37,7 +39,8 @@ primary:
           product_name VARCHAR,
           product_cost VARCHAR,
           product_quantity INT,
-          seller_id VARCHAR
+          seller_id VARCHAR,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         
         CREATE TABLE IF NOT EXISTS MERCHANT.ORDERS (
@@ -46,7 +49,8 @@ primary:
           items_ordered VARCHAR,
           order_status VARCHAR,
           tracking_number VARCHAR,
-          create_time TIMESTAMP
+          create_time TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
       01_populate_data.sql: |
         INSERT INTO MERCHANT.CUSTOMERS ( id, customer_name, customer_email, customer_address) 
