@@ -34,13 +34,13 @@ configurationOverrides:
   "offset.storage.replication.factor": "3"
   "status.storage.replication.factor": "3"
   "security.protocol": "SASL_SSL"
-  "sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"bbb\" password=\"aaa\";"
+  "sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"@@TF_VAR_confluent_cloud_api_key@@\" password=\"@@TF_VAR_confluent_cloud_api_secret@@\";"
   "sasl.mechanism": "PLAIN"
   "client.dns.lookup": "use_all_dns_ips"
   "session.timeout.ms": "45000"
   "acks": "all"
   "basic.auth.credentials.source": "USER_INFO"
-  "basic.auth.user.info": "xxx:yyy"
+  "basic.auth.user.info": "@@TF_VAR_confluent_schema_registry_api_key@@:@@TF_VAR_confluent_schema_registry_api_secret@@"
 
 
 ## Kafka Connect JVM Heap Option
