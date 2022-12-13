@@ -17,7 +17,7 @@ primary:
     scripts:
       00_init_schema.sql: |
         CREATE SCHEMA MERCHANT;
-        CREATE TABLE IF NOT EXISTS MERCHANT.CUSTOMERS (
+        CREATE TABLE IF NOT EXISTS merchant.customers (
           id VARCHAR PRIMARY KEY,
           customer_name VARCHAR,
           customer_email VARCHAR,
@@ -25,7 +25,7 @@ primary:
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         
-        CREATE TABLE IF NOT EXISTS MERCHANT.SELLERS (
+        CREATE TABLE IF NOT EXISTS merchant.sellers (
           id VARCHAR PRIMARY KEY,
           seller_name VARCHAR,
           seller_company VARCHAR,
@@ -34,7 +34,7 @@ primary:
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         
-        CREATE TABLE IF NOT EXISTS MERCHANT.PRODUCTS (
+        CREATE TABLE IF NOT EXISTS merchant.products (
           id INTEGER PRIMARY KEY,
           product_name VARCHAR,
           product_cost VARCHAR,
@@ -43,7 +43,7 @@ primary:
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         
-        CREATE TABLE IF NOT EXISTS MERCHANT.ORDERS (
+        CREATE TABLE IF NOT EXISTS merchant.orders (
           id INTEGER PRIMARY KEY,
           customer_id VARCHAR,
           items_ordered VARCHAR,
@@ -53,7 +53,7 @@ primary:
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
       01_populate_data.sql: |
-        INSERT INTO MERCHANT.CUSTOMERS ( id, customer_name, customer_email, customer_address) 
+        INSERT INTO merchant.customers ( id, customer_name, customer_email, customer_address) 
         VALUES 
               ('00-000-0000','Jane Doe','jane.doe@confluent.io','899 W Evelyn Ave, Mountain View, CA 94041, USA'),
               ('00-000-0001','John Doe','john.doe@confluent.io','1 Bedford St, London WC2E 9HG, United Kingdom'),
@@ -64,7 +64,7 @@ primary:
               ('00-000-0006','Airton Senna','airton.senna@confluent.io',null)
         ;
 
-        INSERT INTO MERCHANT.SELLERS ( id, seller_name, seller_company, seller_email, seller_address)
+        INSERT INTO merchant.sellers ( id, seller_name, seller_company, seller_email, seller_address)
         VALUES 
               ('10-000-0000','Kendall Lundstrom','Asd Automotive','kendall.lundstrom@confluent.io','2511 Warner Street, Ft Lauderdale, FL, 33311, USA'),
               ('10-000-0001','Christopher Nelson','Quesinberry Inc.','chris.nelson@confluent.io','3204 James Martin Circle, Columbus, OH, 43215, USA'),
@@ -76,7 +76,7 @@ primary:
               ('10-000-0007','Jack the R.','Body parts','jack.r@confluent.io',null)
         ;
 
-        INSERT INTO MERCHANT.PRODUCTS ( id, product_name, product_cost, product_quantity, seller_id) 
+        INSERT INTO merchant.products ( id, product_name, product_cost, product_quantity, seller_id) 
         VALUES
               (1000000,'Biking Instrument','$100.00',1000,'10-000-0004'),
               (2000000,'Tire Gadget','$3.99',30,'10-000-0004'),
@@ -88,7 +88,7 @@ primary:
               (7000001,'Silver Disposer','$2.00',99,'10-000-0006')
         ;
         
-        INSERT INTO MERCHANT.ORDERS ( id, customer_id, items_ordered, order_status, tracking_number, create_time)
+        INSERT INTO merchant.orders ( id, customer_id, items_ordered, order_status, tracking_number, create_time)
         VALUES
               (1000000,'00-000-0000','[1000000]','SUBMITTED','N/A', '2022-12-01 09:23:11'::timestamp),
               (2000000,'00-000-0000','[1000000, 2000000]','PROCESSED','N/A', '2022-12-02 11:22:00'::timestamp),

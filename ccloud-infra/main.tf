@@ -62,6 +62,16 @@ resource "confluent_service_account" "app-manager" {
   description  = "Service account to manage 'dev' Kafka cluster"
 }
 
+resource "confluent_service_account" "connect-1" {
+  display_name = "connect"
+  description  = "Connect service account"
+}
+
+resource "confluent_service_account" "connect-1-1" {
+  display_name = "connect1"
+  description  = "Connect service account"
+}
+
 resource "confluent_role_binding" "app-manager-kafka-cluster-admin" {
   principal   = "User:${confluent_service_account.app-manager.id}"
   role_name   = "CloudClusterAdmin"
@@ -193,12 +203,13 @@ resource "confluent_kafka_topic" "connect-cp-kafka-connect-offset" {
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
   }
-  topic_name       = "connect-cp-kafka-connect-offset"
+  topic_name       = "default.connect-offsets"
   partitions_count = 6
   rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
   config           = {
     "retention.ms"                      = "-1"      # keep forever
     "confluent.value.schema.validation" = true      # broker schema validation
+    "cleanup.policy"                    = "compact"
   }
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
@@ -210,12 +221,13 @@ resource "confluent_kafka_topic" "connect-cp-kafka-connect-status" {
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
   }
-  topic_name       = "connect-cp-kafka-connect-status"
+  topic_name       = "default.connect-status"
   partitions_count = 6
   rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
   config           = {
     "retention.ms"                      = "-1"      # keep forever
     "confluent.value.schema.validation" = true      # broker schema validation
+    "cleanup.policy"                    = "compact"
   }
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
@@ -227,12 +239,13 @@ resource "confluent_kafka_topic" "connect-cp-kafka-connect-config" {
   kafka_cluster {
     id = confluent_kafka_cluster.standard.id
   }
-  topic_name       = "connect-cp-kafka-connect-config"
+  topic_name       = "default.connect-configs"
   partitions_count = 1
   rest_endpoint    = confluent_kafka_cluster.standard.rest_endpoint
   config           = {
     "retention.ms"                      = "-1"      # keep forever
     "confluent.value.schema.validation" = true      # broker schema validation
+    "cleanup.policy"                    = "compact"
   }
   credentials {
     key    = confluent_api_key.app-manager-kafka-api-key.id
@@ -267,49 +280,49 @@ resource "confluent_api_key" "app-consumer-kafka-api-key" {
 
 resource "confluent_role_binding" "app-producer-orders-developer-write" {
   principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperWrite"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.orders.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-sellers-developer-write" {
   principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperWrite"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.sellers.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-customers-developer-write" {
   principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperWrite"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.customers.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-products-developer-write" {
   principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperWrite"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.products.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-priced-orders-developer-write" {
   principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperWrite"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.priced_orders.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-connect-cp-kafka-connect-offset-developer-write" {
   principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperWrite"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.connect-cp-kafka-connect-offset.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-connect-cp-kafka-connect-status-developer-write" {
   principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperWrite"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.connect-cp-kafka-connect-status.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-connect-cp-kafka-connect-config-developer-write" {
   principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperWrite"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.connect-cp-kafka-connect-config.topic_name}"
 }
 
@@ -343,68 +356,225 @@ resource "confluent_api_key" "app-producer-kafka-api-key-v2" {
 // needs to be authorized to perform 'READ' operation on both Topic and Group resources:
 resource "confluent_role_binding" "app-producer-developer-orders-read-from-topic" {
   principal   = "User:${confluent_service_account.app-consumer.id}"
-  role_name   = "DeveloperRead"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.orders.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-developer-sellers-read-from-topic" {
   principal   = "User:${confluent_service_account.app-consumer.id}"
-  role_name   = "DeveloperRead"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.sellers.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-developer-customers-read-from-topic" {
   principal   = "User:${confluent_service_account.app-consumer.id}"
-  role_name   = "DeveloperRead"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.customers.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-developer-products-read-from-topic" {
   principal   = "User:${confluent_service_account.app-consumer.id}"
-  role_name   = "DeveloperRead"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.products.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-developer-priced-orders-read-from-topic" {
   principal   = "User:${confluent_service_account.app-consumer.id}"
-  role_name   = "DeveloperRead"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.priced_orders.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-developer-connect-cp-kafka-connect-offset-read-from-topic" {
   principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperRead"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.connect-cp-kafka-connect-offset.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-developer-connect-cp-kafka-connect-status-read-from-topic" {
   principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperRead"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.connect-cp-kafka-connect-status.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-developer-connect-cp-kafka-connect-config-read-from-topic" {
   principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperRead"
+  role_name   = "ResourceOwner"
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.connect-cp-kafka-connect-config.topic_name}"
 }
 
 resource "confluent_role_binding" "app-producer-developer-read-from-group" {
   principal   = "User:${confluent_service_account.app-consumer.id}"
-  role_name   = "DeveloperRead"
+  role_name   = "ResourceOwner"
   // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
   // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
   // Update it to match your target consumer group ID.
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=confluent_cli_consumer_*"
 }
 
+resource "confluent_role_binding" "app-connect-read-from-group-c" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+  // Update it to match your target consumer group ID.
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=connect-consumer-group"
+}
+
+resource "confluent_role_binding" "app-connect-read-from-group-c-all" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+  // Update it to match your target consumer group ID.
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=*"
+}
+
+#resource "confluent_role_binding" "app-connect-read-from-group-c-all-star" {
+#  principal   = "User:*"
+#  role_name   = "ResourceOwner"
+#  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+#  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+#  // Update it to match your target consumer group ID.
+#  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=default.connect"
+#}
+
+
+resource "confluent_role_binding" "app-connect-read-from-group-c-all-star-n" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+  // Update it to match your target consumer group ID.
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=default.connect"
+}
+
+resource "confluent_role_binding" "app-connect-read-from-group-c-all-ResourceOwner" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+  // Update it to match your target consumer group ID.
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=*"
+}
+
 resource "confluent_role_binding" "app-connect-read-from-group" {
-  principal   = "User:${confluent_service_account.app-producer.id}"
-  role_name   = "DeveloperRead"
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
   // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
   // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
   // Update it to match your target consumer group ID.
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=connect*"
+}
+
+resource "confluent_role_binding" "app-connect-read-from-group-cc" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+  // Update it to match your target consumer group ID.
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=consumer*"
+}
+
+// Note that in order to consume from a topic, the principal of the consumer ('app-consumer' service account)
+// needs to be authorized to perform 'READ' operation on both Topic and Group resources:
+resource "confluent_role_binding" "app-producer-developer-orders-read-from-topic-connect" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.orders.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-sellers-read-from-topic-connect" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.sellers.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-customers-read-from-topic-connect" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.customers.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-products-read-from-topic-connect" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.products.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-priced-orders-read-from-topic-connect" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.priced_orders.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-connect-cp-kafka-connect-offset-read-from-topic-connect" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.connect-cp-kafka-connect-offset.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-connect-cp-kafka-connect-status-read-from-topic-connect" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.connect-cp-kafka-connect-status.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-connect-cp-kafka-connect-config-read-from-topic-connect" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/topic=${confluent_kafka_topic.connect-cp-kafka-connect-config.topic_name}"
+}
+
+resource "confluent_role_binding" "app-producer-developer-read-from-group-connect" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+  // Update it to match your target consumer group ID.
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=confluent_cli_consumer_*"
+}
+
+resource "confluent_role_binding" "app-connect-read-from-group-connect" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+  // Update it to match your target consumer group ID.
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=connect*"
+}
+
+resource "confluent_role_binding" "app-connect-read-from-group-connect-cc" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+  // Update it to match your target consumer group ID.
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=consumer*"
+}
+
+
+resource "confluent_role_binding" "app-connect-read-from-group-connect-c" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+  // Update it to match your target consumer group ID.
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=connect-consumer-group"
+}
+
+resource "confluent_role_binding" "app-connect-read-from-group-connect-c-all" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
+  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
+  // Update it to match your target consumer group ID.
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=*"
+}
+
+resource "confluent_role_binding" "app-connect-read-from-group-connect-c-all-ResourceOwner" {
+  principal   = "User:${confluent_service_account.connect-1.id}"
+  role_name   = "ResourceOwner"
+  crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=*"
 }
 
 // schema registry
@@ -477,23 +647,23 @@ resource "confluent_role_binding" "app-ksql-kafka-cluster-admin" {
   crn_pattern = confluent_kafka_cluster.standard.rbac_crn
 }
 
-resource "confluent_ksql_cluster" "ksql-cluster" {
-  display_name = "ksql"
-  csu          = 1
-  kafka_cluster {
-    id = confluent_kafka_cluster.standard.id
-  }
-  credential_identity {
-    id = confluent_service_account.ksql.id
-  }
-  environment {
-    id = confluent_environment.dev.id
-  }
-  depends_on = [
-    confluent_role_binding.app-ksql-kafka-cluster-admin,
-    confluent_stream_governance_cluster.essentials
-  ]
-}
+#resource "confluent_ksql_cluster" "ksql-cluster" {
+#  display_name = "ksql"
+#  csu          = 1
+#  kafka_cluster {
+#    id = confluent_kafka_cluster.standard.id
+#  }
+#  credential_identity {
+#    id = confluent_service_account.ksql.id
+#  }
+#  environment {
+#    id = confluent_environment.dev.id
+#  }
+#  depends_on = [
+#    confluent_role_binding.app-ksql-kafka-cluster-admin,
+#    confluent_stream_governance_cluster.essentials
+#  ]
+#}
 #
 #resource "null_resource" "example1" {
 #  provisioner "local-exec" {
