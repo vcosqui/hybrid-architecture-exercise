@@ -1,0 +1,11 @@
+
+CREATE TABLE sellers (
+	id VARCHAR PRIMARY KEY,
+	seller_name VARCHAR,
+  	seller_company VARCHAR,
+  	seller_email VARCHAR,
+  	seller_address VARCHAR
+	)
+    WITH (KAFKA_TOPIC='sellers',
+        VALUE_FORMAT='AVRO'
+);
