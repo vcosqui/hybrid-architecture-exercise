@@ -1,5 +1,7 @@
 
-CREATE OR REPLACE STREAM single_items AS SELECT
+CREATE OR REPLACE STREAM single_items_k
+WITH (KEY_FORMAT='AVRO', VALUE_FORMAT='AVRO')
+AS SELECT
     id,
     customer_id,
     TRIM(EXPLODE(SPLIT(SUBSTRING(items_ordered, 2,  LEN(items_ordered) -2), ','))) AS item_ordered,

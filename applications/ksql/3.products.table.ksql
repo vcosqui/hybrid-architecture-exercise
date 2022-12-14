@@ -7,6 +7,7 @@ CREATE OR REPLACE TABLE products (
     )
 WITH (KAFKA_TOPIC='products', VALUE_FORMAT='AVRO');
 
-CREATE OR REPLACE TABLE products_normalized
+CREATE OR REPLACE TABLE products_normalized_3
+WITH (KEY_FORMAT='AVRO', VALUE_FORMAT='AVRO')
 AS SELECT id, product_name, CAST(REPLACE(product_cost, '$', '') AS DOUBLE) product_cost, seller_id
 FROM products;

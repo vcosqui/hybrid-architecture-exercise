@@ -1,0 +1,11 @@
+CREATE OR REPLACE TABLE priced_order
+WITH (KEY_FORMAT='AVRO', VALUE_FORMAT='AVRO') AS
+    SELECT
+        item.id,
+        sum(product.product_cost) AS order_price,
+        item.order_status
+    FROM single_items_k item
+        JOIN products_normalized_3 product
+    ON item.item_ordered = product.id
+    GROUP BY item.id, item.order_status
+EMIT CHANGES;

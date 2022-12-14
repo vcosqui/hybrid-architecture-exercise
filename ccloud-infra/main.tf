@@ -40,8 +40,6 @@ resource "confluent_stream_governance_cluster" "essentials" {
   }
 }
 
-# Update the config to use a cloud provider and region of your choice.
-# https://registry.terraform.io/providers/confluentinc/confluent/latest/docs/resources/confluent_kafka_cluster
 resource "confluent_kafka_cluster" "standard" {
   display_name = "dev"
   availability = "SINGLE_ZONE"
@@ -55,8 +53,6 @@ resource "confluent_kafka_cluster" "standard" {
   }
 }
 
-// 'app-manager' service account is required in this configuration to create topics and assign roles
-// to 'app-producer' and 'app-consumer' service accounts.
 resource "confluent_service_account" "app-manager" {
   display_name = "app-manager"
   description  = "Service account to manage 'dev' Kafka cluster"
@@ -86,14 +82,6 @@ resource "confluent_api_key" "app-manager-kafka-api-key" {
       id = confluent_environment.dev.id
     }
   }
-
-  # The goal is to ensure that confluent_role_binding.app-manager-kafka-cluster-admin is created before
-  # confluent_api_key.app-manager-kafka-api-key is used to create instances of
-  # confluent_kafka_topic, confluent_kafka_acl resources.
-
-  # 'depends_on' meta-argument is specified in confluent_api_key.app-manager-kafka-api-key to avoid having
-  # multiple copies of this definition in the configuration which would happen if we specify it in
-  # confluent_kafka_topic, confluent_kafka_acl resources instead.
   depends_on = [
     confluent_role_binding.app-manager-kafka-cluster-admin
   ]
@@ -270,8 +258,6 @@ resource "confluent_api_key" "app-producer-kafka-api-key" {
   }
 }
 
-// Note that in order to consume from a topic, the principal of the consumer ('app-consumer' service account)
-// needs to be authorized to perform 'READ' operation on both Topic and Group resources:
 resource "confluent_role_binding" "app-producer-developer-orders-read-from-topic" {
   principal   = "User:${confluent_service_account.app-consumer.id}"
   role_name   = "DeveloperRead"
@@ -305,13 +291,10 @@ resource "confluent_role_binding" "app-producer-developer-priced-orders-read-fro
 resource "confluent_role_binding" "app-producer-developer-read-from-group" {
   principal   = "User:${confluent_service_account.app-consumer.id}"
   role_name   = "DeveloperRead"
-  // The existing value of crn_pattern's suffix (group=confluent_cli_consumer_*) are set up to match Confluent CLI's default consumer group ID ("confluent_cli_consumer_<uuid>").
-  // https://docs.confluent.io/confluent-cli/current/command-reference/kafka/topic/confluent_kafka_topic_consume.html
-  // Update it to match your target consumer group ID.
   crn_pattern = "${confluent_kafka_cluster.standard.rbac_crn}/kafka=${confluent_kafka_cluster.standard.id}/group=confluent_cli_consumer_*"
 }
 
-// schema registry
+# -------------- schema registry --------------------
 provider "schemaregistry" {
   schema_registry_url = var.confluent_schema_registry_url
   username            = var.confluent_schema_registry_api_key
@@ -329,7 +312,6 @@ data "schemaregistry_schema" "customer" {
 }
 
 resource "schemaregistry_schema" "seller" {
-  # server will use to validate sellers topic events
   subject = "sellers-value"
   schema  = file("./schemas/seller.avsc")
 }
@@ -339,7 +321,6 @@ data "schemaregistry_schema" "seller" {
 }
 
 resource "schemaregistry_schema" "product" {
-  # server will use to validate products topic events
   subject = "products-value"
   schema  = file("./schemas/product.avsc")
 }
@@ -349,7 +330,6 @@ data "schemaregistry_schema" "product" {
 }
 
 resource "schemaregistry_schema" "order" {
-  # server will use to validate orders topic events
   subject = "orders-value"
   schema  = file("./schemas/order.avsc")
 }
@@ -359,7 +339,6 @@ data "schemaregistry_schema" "order" {
 }
 
 resource "schemaregistry_schema" "priced-order" {
-  # server will use to validate priced_orders topic events
   subject = "priced-orders-value"
   schema  = file("./schemas/priced_order.avsc")
 }
@@ -369,7 +348,6 @@ data "schemaregistry_schema" "priced-order" {
 }
 
 # -------------- kSql cluster --------------------
-
 resource "confluent_service_account" "ksql" {
   display_name = "ksql-service-account"
   description  = "Service account to manage ksqlDB cluster"
@@ -398,15 +376,3 @@ resource "confluent_ksql_cluster" "ksql-cluster" {
     confluent_stream_governance_cluster.essentials
   ]
 }
-#
-#resource "null_resource" "example1" {
-#  provisioner "local-exec" {
-#    command = "echo '\n\n-= HEY GO DO THAT MANUAL THINGY THEN RUN `touch /tmp/ididit`; I WILL WAIT HERE =-\n\n'; while ! test -f /tmp/ididit; do sleep 1; done"
-#  }
-#}
-#resource "null_resource" "example2" {
-#  provisioner "local-exec" {
-#    command = "echo 'thanks!'"
-#  }
-#  depends_on = [null_resource.example1]
-#}
