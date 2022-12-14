@@ -1,10 +1,8 @@
 
 CREATE OR REPLACE TABLE customers (
-	id VARCHAR PRIMARY KEY,
-	customer_name VARCHAR,
-	customer_email VARCHAR,
-	customer_address VARCHAR
-	)
-    WITH (KAFKA_TOPIC='customers',
-        VALUE_FORMAT='AVRO'
-);
+    id VARCHAR PRIMARY KEY,
+    customer_name VARCHAR,
+    customer_email VARCHAR,
+    customer_address VARCHAR
+    )
+WITH (KAFKA_TOPIC='customers', VALUE_FORMAT='AVRO');

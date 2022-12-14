@@ -1,0 +1,9 @@
+
+CREATE OR REPLACE STREAM orders (
+    id VARCHAR KEY,
+    customer_id VARCHAR,
+    items_ordered VARCHAR,
+    order_status VARCHAR,
+    tracking_number VARCHAR
+    )
+WITH (KAFKA_TOPIC='orders', VALUE_FORMAT='AVRO');
