@@ -1,5 +1,5 @@
 
-CREATE TABLE sellers (
+CREATE OR REPLACE TABLE sellers (
 	id VARCHAR PRIMARY KEY,
 	seller_name VARCHAR,
   	seller_company VARCHAR,
