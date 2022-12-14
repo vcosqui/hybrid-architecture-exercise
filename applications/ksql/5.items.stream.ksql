@@ -1,0 +1,9 @@
+
+CREATE OR REPLACE STREAM single_items AS SELECT
+    id,
+    customer_id,
+    TRIM(EXPLODE(SPLIT(SUBSTRING(items_ordered, 2,  LEN(items_ordered) -2), ','))) AS item_ordered,
+    order_status,
+    tracking_number
+FROM orders PARTITION BY id
+EMIT CHANGES;
